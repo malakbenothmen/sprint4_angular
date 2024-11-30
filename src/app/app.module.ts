@@ -1,45 +1,69 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { VoyagesComponent } from './voyages/voyages.component';
-import { AddVoyageComponent } from './add-voyage/add-voyage.component';
-import { FormsModule } from '@angular/forms';
-import { UpdateVoyageComponent } from './update-voyage/update-voyage.component';
-import { HttpClientModule  } from '@angular/common/http';
-import { RechercheParTypeComponent } from './recherche-par-type/recherche-par-type.component';
-import { RechercheParDestinationComponent } from './recherche-par-destination/recherche-par-destination.component';
-import { SearchFilterPipe } from './search-filter.pipe';
-import { ListeTypesComponent } from './liste-types/liste-types.component';
-import { UpdateTypeComponent } from './update-type/update-type.component';
-import { LoginComponent } from './login/login.component';
-import { ForbiddenComponent } from './forbidden/forbidden.component';
 
+import { FormsModule } from '@angular/forms';
+
+import { HttpClientModule  } from '@angular/common/http';
+
+
+
+import {KeycloakAngularModule, KeycloakService} from 'keycloak-angular'
+
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
+
+function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
+  return () => {
+    if (isPlatformBrowser(platformId)) {
+      return keycloak.init({
+        config: {
+          url: 'http://localhost:8090',
+          realm: 'malak-realm',
+          clientId: 'voy-app'
+        },
+        initOptions: {
+          onLoad: 'login-required',
+          //checkLoginIframe: true,
+          //onLoad: 'check-sso',
+          silentCheckSsoRedirectUri:
+          window.location.origin + '/assets/silent-check-sso.html'
+        },
+        
+      }).then(authenticated => {
+        console.log('Keycloak authenticated:', authenticated);
+      }).catch(err => {
+        console.error('Keycloak initialization error:', err);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  };
+}
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    VoyagesComponent,
-    AddVoyageComponent,
-    UpdateVoyageComponent,
-    RechercheParTypeComponent,
-    RechercheParDestinationComponent,
-    SearchFilterPipe,
-    ListeTypesComponent,
-    UpdateTypeComponent,
-    LoginComponent,
-    ForbiddenComponent
+    VoyagesComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    KeycloakAngularModule 
   ],
   providers: [
-    provideClientHydration(),
+    { 
+      provide: APP_INITIALIZER, 
+      useFactory: initializeKeycloak, 
+      multi: true, 
+      deps: [KeycloakService, PLATFORM_ID] 
+    }
    
   ],
   bootstrap: [AppComponent]

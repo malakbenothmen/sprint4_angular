@@ -34,17 +34,5 @@ export class VoyagesComponent implements  OnInit {
 
       }
 
-      supprimerVoyage(v: Voyage)
-      {
-        let conf = confirm("Etes-vous sûr ?");
-        if (conf)
-        this.voyageService.supprimerVoyage(v.idVoyage).subscribe(() => {
-        console.log("voyage supprimé");
-        this.chargerVoyages();
-      
-        });
-      } 
-
-
 
 }

@@ -29,8 +29,7 @@
                 <td *ngIf="voy.type">{{ voy.type.nomType }}</td>
                 <td *ngIf="!voy.type">Type inconnu</td>
 
-                <td><a  *ngIf="authService.isAdmin()" class="btn btn-danger" (click)="supprimerVoyage(voy)">Supprimer</a></td>
-                <td><a  *ngIf="authService.isAdmin()" class="btn btn-success" [routerLink]="['/updateVoyage',voy.idVoyage]">Modifier</a></td>
+
               </tr>
             </tbody>
           </table>
